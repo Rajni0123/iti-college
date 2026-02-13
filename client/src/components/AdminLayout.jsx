@@ -1,10 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Megaphone, 
-  FileText, 
-  UserCheck, 
-  Image as ImageIcon, 
+import {
+  LayoutDashboard,
+  Megaphone,
+  FileText,
+  UserCheck,
+  Image as ImageIcon,
   Users,
   School,
   LogOut,
@@ -18,7 +18,8 @@ import {
   Wrench,
   Info,
   GraduationCap,
-  Calendar
+  Calendar,
+  Library
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getProfile } from '../services/api';
@@ -279,7 +280,7 @@ const AdminLayout = () => {
 
             <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
               <p className="px-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">System</p>
-              
+
               <Link
                 to="/admin/fees"
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
@@ -290,6 +291,18 @@ const AdminLayout = () => {
               >
                 <DollarSign className="h-5 w-5" />
                 <span className="text-sm font-medium">Fee Management</span>
+              </Link>
+
+              <Link
+                to="/admin/library"
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                  location.pathname.startsWith('/admin/library')
+                    ? 'bg-[#195de6]/10 text-[#195de6]'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <Library className="h-5 w-5" />
+                <span className="text-sm font-medium">Library Management</span>
               </Link>
 
               <Link

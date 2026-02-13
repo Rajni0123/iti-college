@@ -184,23 +184,27 @@ exports.getFeeById = (req, res) => {
   });
 };
 
-// Create fee record
+// Create fee record (with optional advance payment)
 exports.createFee = (req, res) => {
-  const { 
-    admission_id, 
-    student_name, 
+  const {
+    admission_id,
+    student_name,
     father_name,
     mobile,
-    trade, 
-    fee_type, 
-    amount, 
-    due_date, 
+    trade,
+    fee_type,
+    amount,
+    due_date,
     notes,
     installment_enabled,
     total_installments,
     installment_amounts,
     installment_due_dates,
-    academic_year
+    academic_year,
+    // Advance payment fields
+    advance_payment,
+    payment_method,
+    payment_date
   } = req.body;
 
   console.log('Creating fee record:', req.body);
@@ -222,24 +226,42 @@ exports.createFee = (req, res) => {
   const isInstallment = installment_enabled === true || installment_enabled === 1 || installment_enabled === '1';
   const numInstallments = parseInt(total_installments) || 1;
 
+  // Handle advance payment
+  const advanceAmount = advance_payment ? parseFloat(advance_payment) : 0;
+  const paidAmount = Math.min(advanceAmount, feeAmount);
+  const receiptNumber = paidAmount > 0 ? generateReceiptNumber() : null;
+  const pMethod = paidAmount > 0 ? (payment_method || 'Cash') : null;
+  const pDate = paidAmount > 0 ? (payment_date || new Date().toISOString().split('T')[0]) : null;
+
+  // Auto-calculate status
+  let status = 'Pending';
+  if (paidAmount >= feeAmount) status = 'Paid';
+  else if (paidAmount > 0) status = 'Partially Paid';
+
   db.run(
     `INSERT INTO student_fees (
-      admission_id, student_name, father_name, mobile, trade, fee_type, 
-      total_amount, amount, due_date, notes, invoice_number,
+      admission_id, student_name, father_name, mobile, trade, fee_type,
+      total_amount, amount, paid_amount, due_date, notes, invoice_number,
+      receipt_number, payment_method, payment_date, status,
       installment_enabled, total_installments, academic_year
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      admission_id || null, 
-      student_name, 
+      admission_id || null,
+      student_name,
       father_name || null,
       mobile || null,
-      trade, 
-      fee_type, 
+      trade,
+      fee_type,
       feeAmount,
       feeAmount,
-      due_date || null, 
+      paidAmount,
+      due_date || null,
       notes || null,
       invoiceNumber,
+      receiptNumber,
+      pMethod,
+      pDate,
+      status,
       isInstallment ? 1 : 0,
       numInstallments,
       academicYearValue
@@ -254,15 +276,15 @@ exports.createFee = (req, res) => {
 
       // If installment is enabled, create installment records
       if (isInstallment && numInstallments > 1) {
-        const installmentAmounts = installment_amounts || [];
-        const installmentDueDates = installment_due_dates || [];
+        const installmentAmountsArr = installment_amounts || [];
+        const installmentDueDatesArr = installment_due_dates || [];
         const defaultInstallmentAmount = feeAmount / numInstallments;
 
         const installmentPromises = [];
         for (let i = 0; i < numInstallments; i++) {
-          const instAmount = installmentAmounts[i] ? parseFloat(installmentAmounts[i]) : defaultInstallmentAmount;
-          const instDueDate = installmentDueDates[i] || null;
-          
+          const instAmount = installmentAmountsArr[i] ? parseFloat(installmentAmountsArr[i]) : defaultInstallmentAmount;
+          const instDueDate = installmentDueDatesArr[i] || null;
+
           installmentPromises.push(new Promise((resolve, reject) => {
             db.run(
               `INSERT INTO fee_installments (fee_id, installment_number, amount, due_date) VALUES (?, ?, ?, ?)`,
@@ -277,25 +299,36 @@ exports.createFee = (req, res) => {
 
         Promise.all(installmentPromises)
           .then(() => {
-            res.json({ 
-              id: feeId, 
+            res.json({
+              id: feeId,
               invoice_number: invoiceNumber,
-              message: 'Fee record created with installments successfully' 
+              receipt_number: receiptNumber,
+              status: status,
+              paid_amount: paidAmount,
+              message: 'Fee record created with installments successfully'
             });
           })
           .catch((err) => {
             console.error('Error creating installments:', err);
-            res.json({ 
-              id: feeId, 
+            res.json({
+              id: feeId,
               invoice_number: invoiceNumber,
-              message: 'Fee record created but some installments failed' 
+              receipt_number: receiptNumber,
+              status: status,
+              paid_amount: paidAmount,
+              message: 'Fee record created but some installments failed'
             });
           });
       } else {
-        res.json({ 
-          id: feeId, 
+        res.json({
+          id: feeId,
           invoice_number: invoiceNumber,
-          message: 'Fee record created successfully' 
+          receipt_number: receiptNumber,
+          status: status,
+          paid_amount: paidAmount,
+          message: paidAmount > 0
+            ? `Fee created & ₹${paidAmount} payment collected. Receipt: ${receiptNumber}`
+            : 'Fee record created successfully'
         });
       }
     }

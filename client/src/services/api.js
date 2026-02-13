@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://manerpvtiti.space/api';
 
+// Debug: Log the API URL being used
+console.log('[API] Using API URL:', API_URL);
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -18,8 +21,21 @@ api.interceptors.request.use((config) => {
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
   }
+  console.log('[API] Request:', config.method?.toUpperCase(), config.url, 'Token:', authToken ? 'Present' : 'Missing');
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('[API] Error:', error.response?.status, error.response?.data?.message || error.message);
+    if (error.response?.status === 401) {
+      console.log('[API] Auth error - token may be invalid or expired');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Public APIs
 export const getNotices = () => api.get('/notices');
@@ -171,5 +187,59 @@ export const createStudent = (data) => api.post('/students', data);
 export const updateStudent = (id, data) => api.put(`/students/${id}`, data);
 export const deleteStudent = (id) => api.delete(`/students/${id}`);
 export const getStudentsWithHighDues = () => api.get('/students/high-dues');
+
+// ========================================
+// LIBRARY MANAGEMENT APIs
+// ========================================
+
+// Library Dashboard
+export const getLibraryDashboard = () => api.get('/library/dashboard');
+
+// Library Students
+export const getLibraryStudents = (params) => api.get('/library/students', { params });
+export const searchLibraryStudents = (q) => api.get('/library/students/search', { params: { q } });
+export const getLibraryStudentById = (id) => api.get(`/library/students/${id}`);
+export const createLibraryStudent = (data) => api.post('/library/students', data);
+export const updateLibraryStudent = (id, data) => api.put(`/library/students/${id}`, data);
+export const deleteLibraryStudent = (id) => api.delete(`/library/students/${id}`);
+
+// Library Seats
+export const getLibrarySeats = () => api.get('/library/seats');
+export const assignLibrarySeat = (id, data) => api.put(`/library/seats/${id}/assign`, data);
+export const releaseLibrarySeat = (id) => api.put(`/library/seats/${id}/release`);
+
+// Library Lockers
+export const getLibraryLockers = () => api.get('/library/lockers');
+export const assignLibraryLocker = (id, data) => api.put(`/library/lockers/${id}/assign`, data);
+export const releaseLibraryLocker = (id) => api.put(`/library/lockers/${id}/release`);
+
+// Library Fees
+export const getLibraryFees = (params) => api.get('/library/fees', { params });
+export const collectLibraryFee = (data) => api.post('/library/fees/collect', data);
+export const getLibraryFeeReceipt = (id) => api.get(`/library/fees/receipt/${id}`);
+
+// Library Expenses
+export const getLibraryExpenses = (params) => api.get('/library/expenses', { params });
+export const createLibraryExpense = (data) => api.post('/library/expenses', data);
+export const updateLibraryExpense = (id, data) => api.put(`/library/expenses/${id}`, data);
+export const deleteLibraryExpense = (id) => api.delete(`/library/expenses/${id}`);
+
+// Library Staff
+export const getLibraryStaff = () => api.get('/library/staff');
+export const createLibraryStaff = (data) => api.post('/library/staff', data);
+export const updateLibraryStaff = (id, data) => api.put(`/library/staff/${id}`, data);
+export const deleteLibraryStaff = (id) => api.delete(`/library/staff/${id}`);
+export const libraryStaffLogin = (credentials) => api.post('/library/staff/login', credentials);
+
+// Library Reports
+export const getLibraryDailyReport = (date) => api.get('/library/reports/daily', { params: { date } });
+export const getLibraryMonthlyReport = (month, year) => api.get('/library/reports/monthly', { params: { month, year } });
+export const getLibraryStudentReport = (status) => api.get('/library/reports/students', { params: { status } });
+export const getLibrarySeatReport = () => api.get('/library/reports/seats');
+export const getLibraryExpenseReport = (month, year) => api.get('/library/reports/expenses', { params: { month, year } });
+
+// Library Settings
+export const getLibrarySettings = () => api.get('/library/settings');
+export const updateLibrarySettings = (data) => api.put('/library/settings', data);
 
 export default api;

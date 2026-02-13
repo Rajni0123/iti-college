@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Maner Pvt ITI",
+    "slug": "maner-pvt-iti",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#195de6"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.manerpvtiti.admin"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#195de6"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.manerpvtiti.admin",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "maner-iti-admin",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for document uploads",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to capture photos and documents"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2972da02-18b0-4195-bbe5-464ab33551a6"
+      }
+    },
+    "owner": "raj0120"
+  }
+}

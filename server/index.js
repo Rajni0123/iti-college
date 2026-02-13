@@ -86,6 +86,10 @@ console.log('✓ Student routes registered at /api/students');
 app.use('/api/sessions', require('./routes/session.routes'));
 console.log('✓ Session routes registered at /api/sessions');
 
+// Library Management routes
+app.use('/api/library', require('./routes/library.routes'));
+console.log('✓ Library routes registered at /api/library');
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });

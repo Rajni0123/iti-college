@@ -58,7 +58,11 @@ const FeeManagement = () => {
     total_installments: 2,
     installment_amounts: [],
     installment_due_dates: [],
-    academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
+    academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+    collect_now: true,
+    advance_payment: '',
+    payment_method: 'Cash',
+    payment_date: new Date().toISOString().split('T')[0]
   });
 
   const [paymentData, setPaymentData] = useState({
@@ -204,10 +208,21 @@ const FeeManagement = () => {
         installment_due_dates: formData.installment_due_dates,
         academic_year: formData.academic_year
       };
-      
+
+      // Include advance payment if "Collect Now" is enabled
+      if (formData.collect_now && formData.advance_payment) {
+        const advAmt = parseFloat(formData.advance_payment);
+        if (advAmt > 0) {
+          feeData.advance_payment = advAmt;
+          feeData.payment_method = formData.payment_method || 'Cash';
+          feeData.payment_date = formData.payment_date || new Date().toISOString().split('T')[0];
+        }
+      }
+
       console.log('Submitting fee data:', feeData);
-      await api.post('/fees', feeData);
-      toast.success('Fee record created successfully');
+      const response = await api.post('/fees', feeData);
+      const msg = response.data?.message || 'Fee record created successfully';
+      toast.success(msg);
       fetchFees();
       fetchSummary();
       closeModal();
@@ -237,6 +252,7 @@ const FeeManagement = () => {
       fetchFees();
       fetchSummary();
       setShowPaymentModal(false);
+      setShowDetailsModal(false);
       setSelectedFee(null);
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -363,7 +379,11 @@ const FeeManagement = () => {
       total_installments: 2,
       installment_amounts: [],
       installment_due_dates: [],
-      academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
+      academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+      collect_now: true,
+      advance_payment: '',
+      payment_method: 'Cash',
+      payment_date: new Date().toISOString().split('T')[0]
     });
   };
 
@@ -878,6 +898,59 @@ const FeeManagement = () => {
                   rows="2"
                   placeholder="Any additional notes..."
                 />
+              </div>
+
+              {/* Collect Payment Now */}
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                <label className="flex items-center gap-3 cursor-pointer mb-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.collect_now}
+                    onChange={(e) => setFormData({ ...formData, collect_now: e.target.checked, advance_payment: e.target.checked ? formData.amount : '' })}
+                    className="w-5 h-5 rounded-lg accent-green-600"
+                  />
+                  <span className="text-sm font-bold text-green-800 dark:text-green-300">Collect Payment Now</span>
+                </label>
+                {formData.collect_now && (
+                  <div className="space-y-3 mt-2">
+                    <div>
+                      <label className="block text-xs font-medium text-green-700 dark:text-green-400 mb-1">Payment Amount (₹)</label>
+                      <input
+                        type="number"
+                        value={formData.advance_payment}
+                        onChange={(e) => setFormData({ ...formData, advance_payment: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-700 rounded-lg text-sm"
+                        placeholder="Enter amount to collect"
+                        max={formData.amount || undefined}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-green-700 dark:text-green-400 mb-1">Payment Method</label>
+                        <select
+                          value={formData.payment_method}
+                          onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-700 rounded-lg text-sm"
+                        >
+                          <option value="Cash">Cash</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="UPI">UPI</option>
+                          <option value="Cheque">Cheque</option>
+                          <option value="Card">Card</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-green-700 dark:text-green-400 mb-1">Payment Date</label>
+                        <input
+                          type="date"
+                          value={formData.payment_date}
+                          onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-green-300 dark:border-green-700 rounded-lg text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

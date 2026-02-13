@@ -38,6 +38,17 @@ import FacultyManagement from './admin/FacultyManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import SEOHead from './components/SEOHead';
 
+// Library Management
+import LibraryLayout from './admin/library/LibraryLayout';
+import LibraryDashboard from './admin/library/LibraryDashboard';
+import LibraryStudents from './admin/library/LibraryStudents';
+import LibrarySeatMap from './admin/library/LibrarySeatMap';
+import LibraryFees from './admin/library/LibraryFees';
+import LibraryExpenses from './admin/library/LibraryExpenses';
+import LibraryStaff from './admin/library/LibraryStaff';
+import LibraryReports from './admin/library/LibraryReports';
+import LibrarySettings from './admin/library/LibrarySettings';
+
 function App() {
   return (
     <Router>
@@ -92,6 +103,18 @@ function App() {
           <Route path="about" element={<AboutManagement />} />
           <Route path="admission-process" element={<AdmissionProcessManagement />} />
           <Route path="faculty" element={<FacultyManagement />} />
+
+          {/* Library Management Routes */}
+          <Route path="library" element={<LibraryLayout />}>
+            <Route index element={<LibraryDashboard />} />
+            <Route path="students" element={<LibraryStudents />} />
+            <Route path="seats" element={<LibrarySeatMap />} />
+            <Route path="fees" element={<LibraryFees />} />
+            <Route path="expenses" element={<LibraryExpenses />} />
+            <Route path="staff" element={<LibraryStaff />} />
+            <Route path="reports" element={<LibraryReports />} />
+            <Route path="settings" element={<LibrarySettings />} />
+          </Route>
         </Route>
 
         {/* 404 Page */}

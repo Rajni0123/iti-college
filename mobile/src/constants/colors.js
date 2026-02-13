@@ -1,0 +1,36 @@
+export const Colors = {
+  primary: '#195de6',
+  primaryDark: '#1e40af',
+  primaryLight: '#dbeafe',
+  surface: '#ffffff',
+  background: '#f0f2f5',
+  card: '#ffffff',
+  text: '#0f172a',
+  textSecondary: '#64748b',
+  textLight: '#94a3b8',
+  border: '#e2e8f0',
+  success: '#16a34a',
+  successLight: '#dcfce7',
+  error: '#dc2626',
+  errorLight: '#fef2f2',
+  warning: '#f59e0b',
+  warningLight: '#fef3c7',
+  info: '#0ea5e9',
+  infoLight: '#e0f2fe',
+  // Library Bhagwa (Saffron) Theme
+  bhagwa: '#FF6B00',
+  bhagwaDark: '#E55A00',
+  bhagwaLight: '#FFF3E8',
+  library: '#FF6B00',
+  libraryDark: '#CC5500',
+  libraryLight: '#FFF7ED',
+};
+
+export const StatusColors = {
+  Pending: { bg: '#fef3c7', text: '#b45309' },
+  Approved: { bg: '#dcfce7', text: '#16a34a' },
+  Rejected: { bg: '#fef2f2', text: '#dc2626' },
+  Paid: { bg: '#dcfce7', text: '#16a34a' },
+  'Partially Paid': { bg: '#dbeafe', text: '#2563eb' },
+  Overdue: { bg: '#fef2f2', text: '#dc2626' },
+};

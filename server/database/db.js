@@ -1175,6 +1175,205 @@ const init = () => {
         );
       }
     });
+
+    // ========================================
+    // LIBRARY MANAGEMENT SYSTEM TABLES
+    // ========================================
+
+    // Library Students/Members table
+    db.run(`CREATE TABLE IF NOT EXISTS library_students (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      mobile TEXT NOT NULL,
+      whatsapp_number TEXT,
+      has_whatsapp INTEGER DEFAULT 1,
+      seat_number INTEGER,
+      locker_number INTEGER,
+      admission_date TEXT,
+      monthly_fee REAL DEFAULT 0,
+      fee_status TEXT DEFAULT 'Unpaid',
+      next_due_date TEXT,
+      status TEXT DEFAULT 'Active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_students table:', err);
+      } else {
+        console.log('✓ Library students table initialized');
+      }
+    });
+
+    // Add new columns to library_students if they don't exist
+    db.run(`ALTER TABLE library_students ADD COLUMN admission_fee REAL DEFAULT 0`, () => {});
+    db.run(`ALTER TABLE library_students ADD COLUMN advance_paid REAL DEFAULT 0`, () => {});
+
+    // Library Seats table (170 seats)
+    db.run(`CREATE TABLE IF NOT EXISTS library_seats (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      seat_number INTEGER NOT NULL UNIQUE,
+      status TEXT DEFAULT 'Available',
+      student_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (student_id) REFERENCES library_students(id) ON DELETE SET NULL
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_seats table:', err);
+      } else {
+        console.log('✓ Library seats table initialized');
+        // Initialize 170 seats if table is empty
+        db.get('SELECT COUNT(*) as count FROM library_seats', [], (err, row) => {
+          if (!err && row && row.count === 0) {
+            console.log('Initializing 170 library seats...');
+            for (let i = 1; i <= 170; i++) {
+              db.run('INSERT INTO library_seats (seat_number, status) VALUES (?, ?)', [i, 'Available']);
+            }
+            console.log('✓ 170 library seats created');
+          }
+        });
+      }
+    });
+
+    // Library Lockers table
+    db.run(`CREATE TABLE IF NOT EXISTS library_lockers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      locker_number INTEGER NOT NULL UNIQUE,
+      status TEXT DEFAULT 'Available',
+      student_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (student_id) REFERENCES library_students(id) ON DELETE SET NULL
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_lockers table:', err);
+      } else {
+        console.log('✓ Library lockers table initialized');
+        // Initialize 50 lockers if table is empty
+        db.get('SELECT COUNT(*) as count FROM library_lockers', [], (err, row) => {
+          if (!err && row && row.count === 0) {
+            console.log('Initializing 50 library lockers...');
+            for (let i = 1; i <= 50; i++) {
+              db.run('INSERT INTO library_lockers (locker_number, status) VALUES (?, ?)', [i, 'Available']);
+            }
+            console.log('✓ 50 library lockers created');
+          }
+        });
+      }
+    });
+
+    // Library Fees table
+    db.run(`CREATE TABLE IF NOT EXISTS library_fees (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id INTEGER NOT NULL,
+      student_name TEXT,
+      amount REAL NOT NULL,
+      month TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      payment_mode TEXT DEFAULT 'Cash',
+      payment_date TEXT,
+      receipt_number TEXT,
+      collected_by TEXT,
+      status TEXT DEFAULT 'Paid',
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (student_id) REFERENCES library_students(id) ON DELETE CASCADE
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_fees table:', err);
+      } else {
+        console.log('✓ Library fees table initialized');
+      }
+    });
+
+    // Library Expenses table
+    db.run(`CREATE TABLE IF NOT EXISTS library_expenses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      expense_type TEXT NOT NULL,
+      expense_name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      date TEXT NOT NULL,
+      added_by TEXT,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_expenses table:', err);
+      } else {
+        console.log('✓ Library expenses table initialized');
+      }
+    });
+
+    // Library Staff table
+    db.run(`CREATE TABLE IF NOT EXISTS library_staff (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      mobile TEXT,
+      role TEXT DEFAULT 'staff',
+      status TEXT DEFAULT 'Active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_staff table:', err);
+      } else {
+        console.log('✓ Library staff table initialized');
+        // Create default library admin if not exists
+        db.get('SELECT * FROM library_staff WHERE email = ?', ['libadmin@library.com'], (err, row) => {
+          if (!err && !row) {
+            const hashedPassword = bcrypt.hashSync('library123', 10);
+            db.run(
+              'INSERT INTO library_staff (name, email, password, role) VALUES (?, ?, ?, ?)',
+              ['Library Admin', 'libadmin@library.com', hashedPassword, 'admin'],
+              (err) => {
+                if (err) {
+                  console.error('Error creating library admin:', err);
+                } else {
+                  console.log('✓ Default library admin created: libadmin@library.com / library123');
+                }
+              }
+            );
+          }
+        });
+      }
+    });
+
+    // Library Settings table
+    db.run(`CREATE TABLE IF NOT EXISTS library_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      setting_key TEXT UNIQUE NOT NULL,
+      setting_value TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating library_settings table:', err);
+      } else {
+        console.log('✓ Library settings table initialized');
+        // Insert default settings if not exists
+        db.get('SELECT COUNT(*) as count FROM library_settings', [], (err, row) => {
+          if (!err && row && row.count === 0) {
+            const defaultSettings = [
+              ['library_name', 'Study Library'],
+              ['default_monthly_fee', '500'],
+              ['receipt_header', 'Study Library - Fee Receipt'],
+              ['receipt_footer', 'Thank you for your payment'],
+              ['total_seats', '170'],
+              ['total_lockers', '50'],
+              ['address', ''],
+              ['phone', ''],
+              ['email', '']
+            ];
+            defaultSettings.forEach(([key, value]) => {
+              db.run('INSERT INTO library_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+            });
+            console.log('✓ Default library settings created');
+          }
+        });
+      }
+    });
+
   });
 };
 

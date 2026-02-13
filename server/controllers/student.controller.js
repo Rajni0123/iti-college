@@ -3,7 +3,7 @@ const db = getDb();
 
 // Get all students
 exports.getAllStudents = (req, res) => {
-  const { trade, status, search } = req.query;
+  const { trade, status, search, session } = req.query;
   let query = 'SELECT * FROM students WHERE 1=1';
   const params = [];
 
@@ -14,6 +14,10 @@ exports.getAllStudents = (req, res) => {
   if (status) {
     query += ' AND status = ?';
     params.push(status);
+  }
+  if (session) {
+    query += ' AND (session = ? OR academic_year = ?)';
+    params.push(session, session);
   }
   if (search) {
     query += ' AND (student_name LIKE ? OR mobile LIKE ? OR enrollment_number LIKE ?)';
