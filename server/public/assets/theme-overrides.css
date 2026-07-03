@@ -1,0 +1,125 @@
+/* Site-wide theme base */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0e121b !important;
+  color: #f3f4f6 !important;
+}
+
+/* Form controls — readable in both themes */
+select,
+input,
+textarea {
+  color: #0e121b;
+}
+
+select option {
+  background-color: #ffffff;
+  color: #0e121b;
+}
+
+html.dark select,
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]),
+html.dark textarea {
+  background-color: #1c222d !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+html.dark select option {
+  background-color: #1c222d;
+  color: #f3f4f6;
+}
+
+/* Admission form and dark panels */
+.bg-\[\#0B1120\] label,
+.bg-\[\#0B1120\] p,
+.bg-\[\#0B1120\] span,
+.bg-\[\#0B1120\] select,
+.bg-\[\#0B1120\] input,
+.bg-\[\#0B1120\] textarea {
+  color: #f3f4f6 !important;
+}
+
+.bg-\[\#0B1120\] select,
+.bg-\[\#0B1120\] input,
+.bg-\[\#0B1120\] textarea {
+  background-color: #1a1d2d !important;
+  border-color: #374151 !important;
+}
+
+/* Theme toggle button */
+#iti-theme-toggle,
+#iti-admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid #d0d7e7;
+  background: #ffffff;
+  color: #0e121b;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  font-family: 'Public Sans', sans-serif;
+  line-height: 1;
+  z-index: 60;
+}
+
+#iti-theme-toggle:hover,
+#iti-admin-theme-toggle:hover {
+  background: #f0f2f9;
+  border-color: #195de6;
+}
+
+html.dark #iti-theme-toggle,
+html.dark #iti-admin-theme-toggle {
+  background: #1c222d;
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+html.dark #iti-theme-toggle:hover,
+html.dark #iti-admin-theme-toggle:hover {
+  background: #252a41;
+  border-color: #195de6;
+}
+
+#iti-theme-toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+#iti-admin-theme-toggle {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+#iti-admin-theme-bar {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+html.dark #iti-admin-theme-bar {
+  background: #111621;
+  border-bottom-color: #1e293b;
+}
+
+#iti-admin-theme-bar.visible {
+  display: flex;
+}

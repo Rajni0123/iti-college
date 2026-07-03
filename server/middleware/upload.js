@@ -34,7 +34,7 @@ const upload = multer({
   storage: storage,
   limits: { 
     fileSize: 50 * 1024 * 1024, // 50MB (increased for PDF files)
-    files: 1
+    files: 5, // admission form uploads up to 4 files (photo, aadhaar, marksheet, credit card doc)
   },
   fileFilter: fileFilter,
 });

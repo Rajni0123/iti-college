@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/upload');
+const { handleMulterError } = upload;
 const admissionController = require('../controllers/admission.controller');
 
 // Check UIDAI availability
@@ -11,6 +12,6 @@ router.post('/', upload.fields([
   { name: 'aadhaar', maxCount: 1 },
   { name: 'marksheet', maxCount: 1 },
   { name: 'student_credit_card_doc', maxCount: 1 },
-]), admissionController.applyAdmission);
+]), handleMulterError, admissionController.applyAdmission);
 
 module.exports = router;
